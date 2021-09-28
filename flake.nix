@@ -17,6 +17,25 @@
       ];
     };
 
+    nixosConfigurations.rpi2 = lib.nixosSystem {
+      system = "armv7l-linux";
+
+      modules = [
+        {
+          imports = [
+            # https://nixos.wiki/wiki/NixOS_on_ARM#Build_your_own_image
+            "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-armv7l-multiplatform-installer.nix"
+          ];
+
+          services.openssh = {
+            enable = true;
+            permitRootLogin = "yes";
+          };
+          users.extraUsers.root.initialPassword = lib.mkForce "test123";
+        }
+      ];
+    };
+
     nixosConfigurations.rpi4 = lib.nixosSystem {
       system = "aarch64-linux";
 
@@ -24,8 +43,7 @@
         {
           imports = [
             # https://nixos.wiki/wiki/NixOS_on_ARM#Build_your_own_image
-            "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64.nix"
-            # "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64-installer.nix"
+            "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64-installer.nix"
           ];
 
           services.openssh = {
@@ -59,6 +77,10 @@
       ];
     };
 
-    defaultPackage.${system} = nixosConfigurations.rpi4.config.system.build.sdImage;
+
+    images = {
+      rpi2 = nixosConfigurations.rpi2.config.system.build.sdImage;
+      rpi4 = nixosConfigurations.rpi4.config.system.build.sdImage;
+    };
   };
 }
