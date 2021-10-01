@@ -9,6 +9,8 @@
       inherit system;
     };
     lib = nixpkgs.lib;
+    flash = pkgs.writeShellScriptBin "flash" ''
+    '';
   in rec {
     devShell.${system} = pkgs.mkShell {
       buildInputs = with pkgs; [
@@ -37,6 +39,26 @@
     };
 
     nixosConfigurations.rpi4 = lib.nixosSystem {
+      system = "aarch64-linux";
+
+      modules = [
+        {
+          imports = [
+            # https://nixos.wiki/wiki/NixOS_on_ARM#Build_your_own_image
+            "${nixpkgs}/nixos/modules/installer/sd-card/sd-image-aarch64-installer.nix"
+          ];
+
+          services.openssh = {
+            enable = true;
+            permitRootLogin = "yes";
+          };
+          users.extraUsers.root.initialPassword = lib.mkForce "test123";
+        }
+      ];
+    };
+
+
+    nixosConfigurations.rpi4-new = lib.nixosSystem {
       system = "aarch64-linux";
 
       modules = [
@@ -81,6 +103,7 @@
     images = {
       rpi2 = nixosConfigurations.rpi2.config.system.build.sdImage;
       rpi4 = nixosConfigurations.rpi4.config.system.build.sdImage;
+      rpi4-new = nixosConfigurations.rpi4-new.config.system.build.sdImage;
     };
   };
 }
