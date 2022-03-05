@@ -1,3 +1,6 @@
 .direnv/
 .envrc
 result
+tags
+*.zst
+*.img
